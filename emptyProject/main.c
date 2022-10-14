@@ -35,7 +35,7 @@
 #include "timer.h"
 #include "delay.h"
 #include "control.h"
-#include "adc.h"
+#include "flag.h"
 
 
 //******************************************************************************
@@ -43,9 +43,16 @@
 //!   Empty Project that includes driverlib
 //!
 //******************************************************************************
+
+
+// Motor [left, right]
+
 void main (void)
 {
+//    uint16_t u16CVol;
     WDT_A_hold(WDT_A_BASE);
+
+    uint16_t left, right;
 
     // 初始化
 
@@ -53,80 +60,86 @@ void main (void)
 
     System_Clock_Init();
     Motor_Init();
-    Timer_Init();
-    adcInit();
+    flag_init();
 
     _EINT();
 
-    UpdateMotor(300, 300, 300, 300);
+    // 检测充电完毕
+    while(1)
+    {
+        if (GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN6))
+        {
+            // 防止误判
+            delay_ms(100);
+            {
+                if (GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN6))
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    left = 300;
+    right = 300;
+
+    // 从转弯处开始
+    UpdateMotor(left, right, 0, 0);
+
+    delay_ms(100);
+
+    if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+    {
+        left += 300;
+        right -= 200;
+        UpdateMotor(left, right, 0, 0);
+    } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+    {
+        left -= 100;
+        right += 200;
+        UpdateMotor(left, right, 0, 0);
+    }
+
 
     while(1)
     {
-        //Enable/Start sampling and conversion
-        /*
-         * Base address of ADC12_A Module
-         * Start the conversion into memory buffer 0
-         * Use the single-channel, single-conversion mode
-         */
-        ADC12_A_startConversion(ADC12_A_BASE,
-                ADC12_A_MEMORY_0,
-                ADC12_A_SINGLECHANNEL);
-        //LPM0, ADC12_A_ISR will force exit
-        __bis_SR_register(LPM0_bits + GIE);
+        // 依据电容电压判断速度
+        if (GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN2))
+        {
+            left = 300;
+            right = 300;
+            if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+            {
+                left += 300;
+                right -= 200;
+                UpdateMotor(left, right, 0, 0);
+            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+            {
+                left -= 100;
+                right += 200;
+                UpdateMotor(left, right, 0, 0);
+            } else {
+                delay_ms(20);
+            }
+        } else {
+            left = 998;
+            right = 998;
+            if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+            {
+                right = 0;
+                UpdateMotor(left, right, 0, 0);
+            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+            {
+                left = 0;
+                UpdateMotor(left, right, 0, 0);
+            } else {
+                delay_ms(20);
+            }
+        }
+
     }
 
 
 
 }
 
-
-#if defined(__TI_COMPILER_VERSION__) || defined(__IAR_SYSTEMS_ICC__)
-#pragma vector=ADC12_VECTOR
-__interrupt
-#elif defined(__GNUC__)
-__attribute__((interrupt(ADC12_VECTOR)))
-#endif
-
-void ADC12_A_ISR (void)
-{
-    switch (__even_in_range(ADC12IV,34)){
-        case  0: break;   //Vector  0:  No interrupt
-        case  2: break;   //Vector  2:  ADC overflow
-        case  4: break;   //Vector  4:  ADC timing overflow
-        case  6:          //Vector  6:  ADC12IFG0
-                 //Is Memory Buffer 0 = A0 > 0.5AVcc?
-                 if (ADC12_A_getResults(ADC12_A_BASE,
-                             ADC12_A_MEMORY_0)
-                         >= 0x7ff){
-                     //set P1.0
-                     GPIO_setOutputHighOnPin(
-                             GPIO_PORT_P1,
-                             GPIO_PIN0
-                             );
-                 } else   {
-                     //Clear P1.0 LED off
-                     GPIO_setOutputLowOnPin(
-                             GPIO_PORT_P1,
-                             GPIO_PIN0
-                             );
-                 }
-
-                 //Exit active CPU
-                 __bic_SR_register_on_exit(LPM0_bits);
-        case  8: break;   //Vector  8:  ADC12IFG1
-        case 10: break;   //Vector 10:  ADC12IFG2
-        case 12: break;   //Vector 12:  ADC12IFG3
-        case 14: break;   //Vector 14:  ADC12IFG4
-        case 16: break;   //Vector 16:  ADC12IFG5
-        case 18: break;   //Vector 18:  ADC12IFG6
-        case 20: break;   //Vector 20:  ADC12IFG7
-        case 22: break;   //Vector 22:  ADC12IFG8
-        case 24: break;   //Vector 24:  ADC12IFG9
-        case 26: break;   //Vector 26:  ADC12IFG10
-        case 28: break;   //Vector 28:  ADC12IFG11
-        case 30: break;   //Vector 30:  ADC12IFG12
-        case 32: break;   //Vector 32:  ADC12IFG13
-        case 34: break;   //Vector 34:  ADC12IFG14
-        default: break;
-    }
-}
