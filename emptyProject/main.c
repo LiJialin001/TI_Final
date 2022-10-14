@@ -67,12 +67,12 @@ void main (void)
     // 检测充电完毕
     while(1)
     {
-        if (GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN6))
+        if (!GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN6))
         {
             // 防止误判
             delay_ms(100);
             {
-                if (GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN6))
+                if (!GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN6))
                 {
                     break;
                 }
@@ -86,7 +86,7 @@ void main (void)
     // 从转弯处开始
     UpdateMotor(left, right, 0, 0);
 
-    delay_ms(100);
+    delay_ms(300);
 
     if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
     {
@@ -104,16 +104,17 @@ void main (void)
     while(1)
     {
         // 依据电容电压判断速度
-        if (GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN2))
+        if (!GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN2))
         {
             left = 300;
             right = 300;
-            if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+            UpdateMotor(left, right, 0, 0);
+            if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
             {
                 left += 300;
                 right -= 200;
                 UpdateMotor(left, right, 0, 0);
-            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
             {
                 left -= 100;
                 right += 200;
@@ -124,11 +125,12 @@ void main (void)
         } else {
             left = 998;
             right = 998;
-            if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+            UpdateMotor(left, right, 0, 0);
+            if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
             {
                 right = 0;
                 UpdateMotor(left, right, 0, 0);
-            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
             {
                 left = 0;
                 UpdateMotor(left, right, 0, 0);
