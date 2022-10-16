@@ -24,12 +24,16 @@ void main (void)
     Motor_Init();
     flag_init();
 
+//    GPIO_setAsInputPin(
+//            GPIO_PORT_P6,
+//            GPIO_PIN0 + GPIO_PIN1
+//            );
+
     //P6.0 P6.1 ADC option select
     GPIO_setAsPeripheralModuleFunctionInputPin(
             GPIO_PORT_P6,
-            GPIO_PIN0 + GPIO_PIN1
+            GPIO_PIN0 + GPIO_PIN1 + GPIO_PIN2
             );
-
 
     ADC12_A_init(ADC12_A_BASE,
             ADC12_A_SAMPLEHOLDSOURCE_SC,
@@ -59,52 +63,111 @@ void main (void)
     param_1.endOfSequence = ADC12_A_NOTENDOFSEQUENCE;
     ADC12_A_configureMemory(ADC12_A_BASE ,&param_1);
 
+    ADC12_A_configureMemoryParam param_2 = {0};
+    param_2.memoryBufferControlIndex = ADC12_A_MEMORY_2;
+    param_2.inputSourceSelect = ADC12_A_INPUT_A2;
+    param_2.positiveRefVoltageSourceSelect = ADC12_A_VREFPOS_AVCC;
+    param_2.negativeRefVoltageSourceSelect = ADC12_A_VREFNEG_AVSS;
+    param_2.endOfSequence = ADC12_A_NOTENDOFSEQUENCE;
+    ADC12_A_configureMemory(ADC12_A_BASE ,&param_2);
+
     ADC12_A_clearInterrupt(ADC12_A_BASE,
-            ADC12IE1);
-    ADC12_A_enableInterrupt(ADC12_A_BASE,
-            ADC12IE1);
+            ADC12IE2);
+//    ADC12_A_enableInterrupt(ADC12_A_BASE,
+//            ADC12IE1);
 
     _EINT();
 
-    GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN0);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P4, GPIO_PIN7);
 
-    GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN7);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);
 
 
     // 检测充电完毕（充电模式）
-    while(1)
-    {
-        // 采样充电电位
-        ADC12_A_startConversion(ADC12_A_BASE,
-                ADC12_A_MEMORY_0,
-                ADC12_A_SEQOFCHANNELS);
+//    while(1)
+//    {
+//        // 采样充电电位
+//        ADC12_A_startConversion(ADC12_A_BASE,
+//                ADC12_A_MEMORY_2,
+//                ADC12_A_SEQOFCHANNELS);
+//
+//        //LPM0, ADC12_A_ISR will force exit
+////        __bis_SR_register(LPM4_bits + GIE);
+//        //for Debugger
+////        __no_operation();
+//
+//
+//
+//        if (ADC12_A_getResults(ADC12_A_BASE, ADC12_A_MEMORY_2) <= 0x03ff)               // ToDo : 调节充电结束标志阈值
+//        {
+//            // 防止误判
+//            delay_ms(100);
+//            ADC12_A_startConversion(ADC12_A_BASE,
+//                    ADC12_A_MEMORY_2,
+//                    ADC12_A_SEQOFCHANNELS);
+//
+//            //LPM0, ADC12_A_ISR will force exit
+////            __bis_SR_register(LPM4_bits + GIE);        // ToDo: 测试低功耗模式
+//            //for Debugger
+////            __no_operation();
+//            if (ADC12_A_getResults(ADC12_A_BASE, ADC12_A_MEMORY_2) <= 0x03ff)
+//            {
+//                GPIO_setOutputHighOnPin(GPIO_PORT_P4, GPIO_PIN7);
+//                break;
+//            }
+//        }
+//    }
 
-        //LPM0, ADC12_A_ISR will force exit
-//        __bis_SR_register(LPM4_bits + GIE);
-        //for Debugger
-        __no_operation();
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
+    delay_ms(1000);
 
-        if (ADC12_A_getResults(ADC12_A_BASE,
-                               ADC12_A_MEMORY_0) <= 0x005)               // ToDo : 调节充电结束标志阈值
-        {
-            // 防止误判
-            delay_ms(100);
-            ADC12_A_startConversion(ADC12_A_BASE,
-                    ADC12_A_MEMORY_0,
-                    ADC12_A_SEQOFCHANNELS);
 
-            //LPM0, ADC12_A_ISR will force exit
-//            __bis_SR_register(LPM4_bits + GIE);        // ToDo: 测试低功耗模式
-            //for Debugger
-            __no_operation();
-            if (ADC12_A_getResults(ADC12_A_BASE,
-                                    ADC12_A_MEMORY_0) <= 0x00f)
-            {
-                GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN0);   // ToDo: 比赛时换成P4.7
-                break;
-            }
-        }
-    }
 
     // 传感器上电
     GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN3);
@@ -116,7 +179,14 @@ void main (void)
     //LPM0, ADC12_A_ISR will force exit
 //        __bis_SR_register(LPM4_bits + GIE);
     //for Debugger
-    __no_operation();
+//    __no_operation();
+
+
+    GPIO_setOutputHighOnPin(GPIO_PORT_P6, GPIO_PIN4);
+    GPIO_setOutputHighOnPin(GPIO_PORT_P3, GPIO_PIN6);
+
+    GPIO_setOutputLowOnPin(GPIO_PORT_P7, GPIO_PIN0);
+    GPIO_setOutputLowOnPin(GPIO_PORT_P3, GPIO_PIN5);
 
 
     // 电量较高模式
@@ -124,35 +194,30 @@ void main (void)
     {
         // ToDo: 是否每n个周期才一次ADC以节省能耗
         // 采样电容电位
-        ADC12_A_startConversion(ADC12_A_BASE,
-                ADC12_A_MEMORY_1,
-                ADC12_A_SEQOFCHANNELS);
-
-        if (ADC12_A_getResults(ADC12_A_BASE,
-                                ADC12_A_MEMORY_1) >= 0x00f)
-        {
-            if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+//        ADC12_A_startConversion(ADC12_A_BASE,
+//                ADC12_A_MEMORY_1,
+//                ADC12_A_SEQOFCHANNELS);
+//
+//        if (ADC12_A_getResults(ADC12_A_BASE,
+//                                ADC12_A_MEMORY_1) >= 0x291)
+//        {
+            if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
             {
-                left = 0.8*ADC12_A_getResults(ADC12_A_BASE,
-                                              ADC12_A_MEMORY_1);
-                right = 0.1*ADC12_A_getResults(ADC12_A_BASE,
-                                               ADC12_A_MEMORY_1);
-            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN0))
+                // ToDo: 参数调整
+                left = 800;
+                right =0;
+            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
             {
-                left = 0.1*ADC12_A_getResults(ADC12_A_BASE,
-                                              ADC12_A_MEMORY_1);
-                right = 0.8*ADC12_A_getResults(ADC12_A_BASE,
-                                               ADC12_A_MEMORY_1);
-            } else {
-                left = 0.5*ADC12_A_getResults(ADC12_A_BASE,
-                                              ADC12_A_MEMORY_1);
-                right = 0.5*ADC12_A_getResults(ADC12_A_BASE,
-                                               ADC12_A_MEMORY_1);
+                left = 0;
+                right = 800;
+            } else {  // ToDo: 是否有电压不稳导致提前跳出高电位模式循环
+                left =300;
+                right = 300;
             }
              UpdateMotor(left, right, 0, 0);
-        } else {
-            break;
-        }
+//        } else {
+//            break;
+//        }
     }
 
 
@@ -169,60 +234,17 @@ void main (void)
                        );
         GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN2);
         GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN3);
-
-//            left = 998;
-//            right = 998;
-//            UpdateMotor(left, right, 0, 0);
         if (GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
         {
-//                right = 0;
-//                UpdateMotor(left, right, 0, 0);
             GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN2);
             GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN3);
         } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
         {
-//                left = 0;
-//                UpdateMotor(left, right, 0, 0);
             GPIO_setOutputLowOnPin(GPIO_PORT_P1, GPIO_PIN2);
             GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN3);
         } else {
             GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN2);
             GPIO_setOutputHighOnPin(GPIO_PORT_P1, GPIO_PIN3);
-            // 传感器断电
-//                GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN3);
-//                GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN6);
-//                delay_ms(20);
-        }
-
-
-
-
-
-
-        // 依据电容电压判断速度
-        if (!GPIO_getInputPinValue(GPIO_PORT_P3, GPIO_PIN2))
-        {
-            left = 300;
-            right = 300;
-            UpdateMotor(left, right, 0, 0);
-            if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && !GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
-            {
-                left += 300;
-                right -= 200;
-                UpdateMotor(left, right, 0, 0);
-            } else if (!GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN2) && GPIO_getInputPinValue(GPIO_PORT_P2, GPIO_PIN0))
-            {
-                left -= 100;
-                right += 200;
-                UpdateMotor(left, right, 0, 0);
-            } else {
-                // 传感器断电
-//                GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN3);
-//                GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN6);
-//                delay_ms(20);
-            }
-        } else {
-
         }
 
     }

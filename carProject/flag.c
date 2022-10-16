@@ -49,6 +49,27 @@ void flag_init(void)
                    GPIO_PORT_P1,
                    GPIO_PIN0
                    );
+
+    // A IN1
+    GPIO_setAsOutputPin(
+            GPIO_PORT_P6,
+            GPIO_PIN4
+            );
+    // A IN2
+    GPIO_setAsOutputPin(
+            GPIO_PORT_P7,
+            GPIO_PIN0
+            );
+    // B IN1
+    GPIO_setAsOutputPin(
+            GPIO_PORT_P3,
+            GPIO_PIN6
+            );
+    // B IN2
+    GPIO_setAsOutputPin(
+            GPIO_PORT_P3,
+            GPIO_PIN5
+            );
     GPIO_setAsOutputPin(
                    GPIO_PORT_P4,
                    GPIO_PIN7
